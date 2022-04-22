@@ -1,35 +1,35 @@
 import React from 'react'
-import { IUser } from '../../types/userType'
+import { FieldValues, UseFormRegister, UseFormSetValue } from 'react-hook-form'
+import { IPerson, IUser, keyType } from '../../types/userType'
 
 interface IInputUserProps extends IUser {
-  value:
-    | string
-    | {
-        street?: string | undefined
-        city?: string | undefined
-        zipcode?: string | undefined
-      }
-    | {
-        name: string
-        catchPhrase?: string | undefined
-        bs?: string | undefined
-      }
-    | undefined
+  register: UseFormRegister<IPerson>
+  inputValue: keyType
+  setValue: UseFormSetValue<IPerson>
 }
 
 const InputUser: React.FC<IInputUserProps> = (props) => {
-  console.log(props)
+  const { register, inputValue, setValue } = props
 
-  if (typeof props.value === 'string' || typeof props.value === 'number') {
-    return <input type='text' placeholder={props.value} />
-  } else if (typeof props.value === 'object') {
-    if ('name' in props.value) {
-      return <input type='text' placeholder={props.value.name} />
-    } else {
-      return <input type='text' placeholder={props.value.city} />
-    }
+  const handleChange = (
+    e:
+      | React.ChangeEvent<HTMLInputElement>
+      | React.ChangeEvent<HTMLTextAreaElement>,
+    type: typeof inputValue
+  ) => {
+    setValue(type, e.target.value)
   }
-  return <></>
+  console.log(inputValue)
+
+  return inputValue !== 'comment' ? (
+    <input
+      {...register(inputValue, { required: true })}
+      type='text'
+      onChange={(e) => handleChange(e, inputValue)}
+    />
+  ) : (
+    <textarea onChange={(e) => handleChange(e, inputValue)}></textarea>
+  )
 }
 
 export default InputUser

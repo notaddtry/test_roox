@@ -1,29 +1,30 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
-import axios from 'axios'
-// import { getData } from '../../lib/api/fetchData'
 
-import { IFetchUser, IUser } from '../../types/userType'
+import { IPerson, IUser } from '../../types/userType'
 
 export interface UserState {
   users: IUser[]
+  loading: 'idle' | 'fulfilled' | 'rejected' | 'pending'
+  error: object | null
 }
 
 const initialState: UserState = {
   users: [],
+  loading: 'idle',
+  error: null,
 }
-
-// export const fetchUsers = createAsyncThunk('user/fetchUser', async (data) => {
-//   console.log(data)
-
-//   return data
-//   // const response = await getData()
-//   // return response
-// })
 
 export const fetchUsers = createAsyncThunk(
   'user/fetchUser',
-  (data: IFetchUser[]) => {
-    return data
+  (data: IUser[], { rejectWithValue }) => {
+    try {
+      if (!data) {
+        throw new Error('Server error')
+      }
+      return data
+    } catch (error) {
+      return rejectWithValue(error.message)
+    }
   }
 )
 
@@ -32,19 +33,52 @@ export const userSlice = createSlice({
   initialState,
   reducers: {
     editUser(state, action: PayloadAction<IUser>) {
-      const user = state.users.find((user) => user.id === action.payload.id)
-      console.log(user)
+      state.users = state.users.map((user) => {
+        if (user.id === action.payload.id) {
+          return (user = action.payload)
+        } else {
+          return user
+        }
+      })
+    },
+    sortUser(state, action: PayloadAction<'company' | 'city'>) {
+      action.payload === 'company'
+        ? state.users.sort(function (firstUser, secondUser) {
+            if (firstUser.company?.name! > secondUser.company?.name!) {
+              return 1
+            } else if (firstUser.company?.name! < secondUser.company?.name!) {
+              return -1
+            } else {
+              return 0
+            }
+          })
+        : state.users.sort(function (firstUser, secondUser) {
+            if (firstUser.address?.city! > secondUser.address?.city!) {
+              return 1
+            } else if (firstUser.address?.city! < secondUser.address?.city!) {
+              return -1
+            } else {
+              return 0
+            }
+          })
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(fetchUsers.pending, (state, action) => {})
+    builder.addCase(fetchUsers.pending, (state) => {
+      state.loading = 'pending'
+      state.error = null
+    })
     builder.addCase(fetchUsers.fulfilled, (state, action) => {
+      state.loading = 'fulfilled'
       state.users = action.payload
     })
-    builder.addCase(fetchUsers.rejected, (state, action) => {})
+    builder.addCase(fetchUsers.rejected, (state, action) => {
+      state.loading = 'rejected'
+      state.error = action.error
+    })
   },
 })
 
-export const {} = userSlice.actions
+export const { editUser, sortUser } = userSlice.actions
 
 export default userSlice.reducer
