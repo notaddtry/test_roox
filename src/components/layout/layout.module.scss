@@ -1,0 +1,28 @@
+main {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar_wrapper {
+  background-color: #bdbdbd;
+}
+
+.sidebar_body {
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 1.5rem;
+}
+
+.sidebar_body > * {
+  margin-bottom: 10px;
+}
+
+.sidebar_btn {
+  color: #fff;
+  padding: 5px 1rem;
+  background-color: #4b51ef;
+  border-radius: 5px;
+  &:disabled {
+    background-color: #afafaf;
+  }
+}

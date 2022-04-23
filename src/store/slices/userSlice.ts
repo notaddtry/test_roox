@@ -1,11 +1,12 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { getData } from '../../lib/api/fetchData'
 
-import { IPerson, IUser } from '../../types/userType'
+import { IUser } from '../../types/userType'
 
 export interface UserState {
   users: IUser[]
   loading: 'idle' | 'fulfilled' | 'rejected' | 'pending'
-  error: object | null
+  error: string | null | undefined
 }
 
 const initialState: UserState = {
@@ -16,7 +17,8 @@ const initialState: UserState = {
 
 export const fetchUsers = createAsyncThunk(
   'user/fetchUser',
-  (data: IUser[], { rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
+    const data = await getData(10)
     try {
       if (!data) {
         throw new Error('Server error')
@@ -74,7 +76,7 @@ export const userSlice = createSlice({
     })
     builder.addCase(fetchUsers.rejected, (state, action) => {
       state.loading = 'rejected'
-      state.error = action.error
+      state.error = action.error.message
     })
   },
 })
